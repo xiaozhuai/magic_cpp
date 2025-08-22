@@ -28,7 +28,7 @@ jobs:
             -   name: Check code style
                 run: |
                     cmake -B build .
-                    cmake --build build -- check-format
+                    cmake --build build --target check-format
 
     windows:
         needs: code-style
@@ -55,12 +55,12 @@ jobs:
                 shell: cmd
                 run: |
                     cmake -GNinja -B build .
-                    cmake --build build -- all
+                    cmake --build build --target all
             -   name: Test
                 if: ${{ matrix.arch != 'amd64_arm64' }}
                 shell: cmd
                 run: |
-                    cmake --build build -- check
+                    cmake --build build --target check
 
     macos:
         needs: code-style
@@ -83,12 +83,12 @@ jobs:
             -   name: Build
                 run: |
                     cmake -GNinja -DCMAKE_OSX_ARCHITECTURES=${{matrix.arch}} -B build .
-                    cmake --build build -- all
+                    cmake --build build --target all
                     echo "SYSTEM_ARCH=$(uname -m)" >> $GITHUB_ENV
             -   name: Test
                 if: ${{ env.SYSTEM_ARCH == 'arm64' || matrix.arch == 'x86_64' }}
                 run: |
-                    cmake --build build -- check
+                    cmake --build build --target check
 
     linux:
         needs: code-style
@@ -107,7 +107,7 @@ jobs:
             -   name: Build
                 run: |
                     cmake -GNinja -B build .
-                    cmake --build build -- all
+                    cmake --build build --target all
             -   name: Test
                 run: |
-                    cmake --build build -- check
+                    cmake --build build --target check

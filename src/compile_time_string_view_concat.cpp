@@ -20,14 +20,11 @@ struct impl {
         constexpr size_t N = (strs.size() + ... + 0);
         StrLiteral<CharT, N> result{};
         size_t offset = 0;
-        (
-            [&] {
-                for (auto c : strs) {
-                    result.data[offset++] = c;
-                }
-            }(),  //
-            ...   //
-        );
+        ([&] {
+            for (auto c : strs) {
+                result.data[offset++] = c;
+            }
+        }(), ...);
         result.data[N] = '\0';
         return result;
     }

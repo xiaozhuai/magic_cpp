@@ -29,7 +29,7 @@ else ()
             --force-new-ctest-process --output-on-failure)
 endif ()
 
-find_program(CLANG_FORMAT clang-format)
+find_program(CLANG_FORMAT clang-format NO_CMAKE_PATH)
 if (CLANG_FORMAT)
     file(GLOB_RECURSE ALL_SOURCES CONFIGURE_DEPENDS src/*.cpp)
     add_custom_target(

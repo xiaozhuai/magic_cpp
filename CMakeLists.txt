@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+if (APPLE)
+    include(CheckLinkerFlag)
+    check_linker_flag(C "-Wl,-no_warn_duplicate_libraries" HAVE_NO_WARN_DUPLICATE)
+    if(HAVE_NO_WARN_DUPLICATE)
+        add_link_options("-Wl,-no_warn_duplicate_libraries")
+    endif()
+endif ()
 
 enable_testing()
 

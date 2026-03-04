@@ -31,6 +31,7 @@ public:
     template <class Derived>
     struct Registrar final {
         explicit Registrar(std::string_view type) {
+            static_assert(std::is_base_of_v<Base, Derived>, "Derived must inherit from Base");
             creators().insert_or_assign(std::string(type), [](Args &&...args) -> std::unique_ptr<Base> {
                 return std::make_unique<Derived>(std::forward<Args>(args)...);
             });

@@ -13,32 +13,27 @@ template <class Base, typename... Args>
 class Factory {
 public:
     static Base *create(std::string_view type, Args &&...args) {
-        auto it = Factory::creators().find(type);
-        return (it != creators().end()) ? (it->second)(std::forward<decltype(args)>(args)...) : nullptr;
+        auto obj = create_unique(type, std::forward<Args>(args)...);
+        return obj ? obj.release() : nullptr;
     }
 
     static std::shared_ptr<Base> create_shared(std::string_view type, Args &&...args) {
-        auto it = Factory::shared_creators().find(type);
-        return (it != shared_creators().end()) ? (it->second)(std::forward<decltype(args)>(args)...) : nullptr;
+        auto obj = create_unique(type, std::forward<Args>(args)...);
+        return obj ? std::shared_ptr<Base>(std::move(obj)) : nullptr;
     }
 
     static std::unique_ptr<Base> create_unique(std::string_view type, Args &&...args) {
-        auto it = Factory::unique_creators().find(type);
-        return (it != unique_creators().end()) ? (it->second)(std::forward<decltype(args)>(args)...) : nullptr;
+        auto &map = creators();
+        auto it = map.find(type);
+        return (it != map.end()) ? (it->second)(std::forward<Args>(args)...) : nullptr;
     }
 
     template <class Derived>
     struct Registrar final {
         explicit Registrar(std::string_view type) {
-            creators()[std::string(type)] = [](Args &&...args) -> Base * {
-                return new Derived(std::forward<decltype(args)>(args)...);
-            };
-            shared_creators()[std::string(type)] = [](Args &&...args) -> std::shared_ptr<Base> {
-                return std::make_shared<Derived>(std::forward<decltype(args)>(args)...);
-            };
-            unique_creators()[std::string(type)] = [](Args &&...args) -> std::unique_ptr<Base> {
-                return std::make_unique<Derived>(std::forward<decltype(args)>(args)...);
-            };
+            creators().insert_or_assign(std::string(type), [](Args &&...args) -> std::unique_ptr<Base> {
+                return std::make_unique<Derived>(std::forward<Args>(args)...);
+            });
         }
     };
 
@@ -51,27 +46,11 @@ private:
     };
     using StringEqual = std::equal_to<>;
 
-    using Creator = std::function<Base *(Args...)>;
+    using Creator = std::function<std::unique_ptr<Base>(Args...)>;
     using CreatorMap = std::unordered_map<std::string, Creator, StringHash, StringEqual>;
-
-    using SharedCreator = std::function<std::shared_ptr<Base>(Args...)>;
-    using SharedCreatorMap = std::unordered_map<std::string, SharedCreator, StringHash, StringEqual>;
-
-    using UniqueCreator = std::function<std::unique_ptr<Base>(Args...)>;
-    using UniqueCreatorMap = std::unordered_map<std::string, UniqueCreator, StringHash, StringEqual>;
 
     static CreatorMap &creators() {
         static CreatorMap instance;
-        return instance;
-    }
-
-    static SharedCreatorMap &shared_creators() {
-        static SharedCreatorMap instance;
-        return instance;
-    }
-
-    static UniqueCreatorMap &unique_creators() {
-        static UniqueCreatorMap instance;
         return instance;
     }
 };

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Install clang-format-22
@@ -45,7 +45,7 @@ jobs:
           - amd64_arm64
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: TheMrMilchmann/setup-msvc-dev@v4
@@ -69,23 +69,20 @@ jobs:
       fail-fast: false
       matrix:
         runner:
-          - macos-14
           - macos-15
-        arch:
-          - x86_64
-          - arm64
+          - macos-26
+          - macos-15-intel
+          - macos-26-intel
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Build
         run: |
-          cmake -GNinja -DCMAKE_OSX_ARCHITECTURES=${{matrix.arch}} -B build .
+          cmake -GNinja -B build .
           cmake --build build --target all
-          echo "SYSTEM_ARCH=$(uname -m)" >> $GITHUB_ENV
       - name: Test
-        if: ${{ env.SYSTEM_ARCH == 'arm64' || matrix.arch == 'x86_64' }}
         run: |
           cmake --build build --target check
 
@@ -100,7 +97,7 @@ jobs:
           - ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Build

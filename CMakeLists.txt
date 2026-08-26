@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(magic_cpp)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
@@ -13,6 +13,14 @@ if(APPLE)
         add_link_options("-Wl,-no_warn_duplicate_libraries")
     endif()
 endif()
+
+include(FetchContent)
+FetchContent_Declare(
+    msft_proxy4
+    GIT_REPOSITORY https://github.com/ngcpp/proxy
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(msft_proxy4)
 
 enable_testing()
 
@@ -33,6 +41,8 @@ foreach(SOURCE ${SOURCES})
     get_filename_component(NAME ${SOURCE} NAME_WE)
     add_magic_cpp_target(${NAME})
 endforeach()
+
+target_link_libraries(dependency_injection_proxy PRIVATE msft_proxy4::proxy)
 
 find_program(CLANG_FORMAT clang-format NO_CMAKE_PATH)
 if(CLANG_FORMAT)

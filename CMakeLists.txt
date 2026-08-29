@@ -46,7 +46,7 @@ target_link_libraries(dependency_injection_proxy PRIVATE msft_proxy4::proxy)
 
 find_program(CLANG_FORMAT clang-format NO_CMAKE_PATH)
 if(CLANG_FORMAT)
-    file(GLOB_RECURSE ALL_SOURCES CONFIGURE_DEPENDS src/*.cpp)
+    file(GLOB_RECURSE ALL_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
     add_custom_target(
         format
         COMMAND "${CLANG_FORMAT}" -i --verbose ${ALL_SOURCES}
